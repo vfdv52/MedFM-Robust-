@@ -1,20 +1,28 @@
 #!/usr/bin/env python3
 """
-合并多个模型的评测结果，生成完整的论文风格表格
+Merge evaluation results from multiple models to generate a complete paper-style table.
 
-参考REOBench论文表格格式:
+Refer to the REOBench paper table format:
+
 - Table 1: Scene classification
+
 - Table 2: Semantic segmentation
+
 - Table 3: Object detection
+
 - Table 4: Image captioning
+
 - Table 5: VQA
+
 - Table 6: Visual grounding
 
-使用方法:
-    python merge_results_to_table.py --input_dir ./outputs --task vqa --output paper_table.xlsx
+Usage:
 
-    或者指定多个JSON文件:
-    python merge_results_to_table.py --files results1.json results2.json --output paper_table.xlsx
+python merge_results_to_table.py --input_dir ./outputs --task vqa --output paper_table.xlsx
+
+Or specify multiple JSON files:
+
+python merge_results_to_table.py --files results1.json results2.json --output paper_table.xlsx
 """
 
 import os
@@ -27,13 +35,13 @@ from datetime import datetime
 
 
 def load_results(json_file):
-    """加载单个结果文件"""
+    """Load a single result file"""
     with open(json_file, 'r') as f:
         return json.load(f)
 
 
 def extract_metrics_from_stats(stats, task_name):
-    """从统计信息中提取指标"""
+    """Extracting indicators from statistical information"""
     if task_name == 'grounding':
         metric_key = 'accuracy@0.5'
         is_percentage = True
@@ -51,7 +59,7 @@ def extract_metrics_from_stats(stats, task_name):
 
 
 def process_single_result(result_data):
-    """处理单个结果文件，提取关键指标"""
+    """Process individual result files and extract key metrics."""
     config = result_data.get('config', {})
     stats = result_data.get('statistics', {})
 
@@ -61,7 +69,7 @@ def process_single_result(result_data):
 
     metric_key, is_percentage = extract_metrics_from_stats(stats, task)
 
-    # 提取各扰动类型的数据
+    # Extract data for each type of disturbance.
     perturbation_data = {}
     clean_metric = None
     overall_metric = None
@@ -74,10 +82,10 @@ def process_single_result(result_data):
         if key == 'none_s0':
             clean_metric = s.get(metric_key, s.get('mean_score', s.get('mean_iou', 0)))
         else:
-            # 跳过非扰动统计键
+
             if key in ['caption_standard_metrics'] or not key.endswith(tuple(f'_s{i}' for i in range(10))):
             	continue
-            # 解析扰动类型和严重程度
+
             parts = key.split('_s')
             if len(parts) == 2:
                 perturb_type = parts[0]
@@ -88,7 +96,7 @@ def process_single_result(result_data):
 
                 perturbation_data[perturb_type][severity] = s.get(metric_key, s.get('mean_score', s.get('mean_iou', 0)))
 
-    # 计算每种扰动类型的平均值
+    # Calculate the average value for each type of disturbance.
     perturb_avg = {}
     for perturb_type, severity_data in perturbation_data.items():
         if severity_data:
@@ -108,18 +116,24 @@ def process_single_result(result_data):
 
 def merge_same_setting(results_list):
     """\
-    将同一个 (model_type, dataset, task) 的多份结果合并成一条完整记录。
-
-    说明：
-    - 你的 pipeline 可能会对同一组配置分别跑 clean 和 perturbed 两次评测，
-      导致生成两份 results_*.json（分别只有 Clean 或只有扰动列）。
-    - 该函数会把它们合并，避免最终 CSV/Excel 中大量 '-' 的占位。
-
-    合并策略（尽量保持原有核心功能不变）：
-    - clean / overall_avg：取非 None 的值（优先已存在的）
-    - perturbation_detail：按扰动类型、强度做字典深合并
-    - perturbation_avg：基于合并后的 detail 重新计算均值
-    - is_percentage：必须一致，否则报错（避免不同任务指标混淆）
+    This function merges multiple results for the same (model_type, dataset, task) into a single complete record.
+    
+    Note:
+    - Your pipeline might run `clean` and `perturbed` evaluations separately for the same configuration set,
+    
+    resulting in two `results_*.json` files (one containing only the Clean column and the other only the perturbation column).
+    
+    - This function merges them, avoiding excessive '-' placeholders in the final CSV/Excel file.
+    
+    Merging strategy (preserving core functionality as much as possible):
+    
+    - `clean` / `overall_avg`: Takes values ​​other than None (prioritizing existing values).
+    
+    - `perturbation_detail`: Performs a deep dictionary merge based on perturbation type and intensity.
+    
+    - `perturbation_avg`: Recalculates the mean based on the merged detail.
+    
+    - `is_percentage`: Must be consistent; otherwise, an error will occur (to avoid confusion between metrics from different tasks).
     """
     if not results_list:
         return results_list
@@ -143,7 +157,7 @@ def merge_same_setting(results_list):
 
         m = merged[key]
 
-        # 指标类型必须一致
+        # The indicator types must be consistent.
         if m.get('is_percentage') != r.get('is_percentage', True):
             raise ValueError(
                 f"is_percentage mismatch for {key}: {m.get('is_percentage')} vs {r.get('is_percentage')}"
@@ -156,7 +170,7 @@ def merge_same_setting(results_list):
         if m.get('overall_avg') is None and r.get('overall_avg') is not None:
             m['overall_avg'] = r.get('overall_avg')
 
-        # 深合并扰动明细
+        # Deep Merge Disturbance Details
         detail = r.get('perturbation_detail') or {}
         for pt, sev_map in detail.items():
             if pt not in m['perturbation_detail']:
@@ -164,7 +178,7 @@ def merge_same_setting(results_list):
             if isinstance(sev_map, dict):
                 m['perturbation_detail'][pt].update(sev_map)
 
-    # 基于 detail 重算 perturbation_avg
+    # Recalculate perturbation_avg based on detail
     for m in merged.values():
         pert_avg = {}
         for pt, sev_map in (m.get('perturbation_detail') or {}).items():
@@ -176,7 +190,7 @@ def merge_same_setting(results_list):
 
 
 def format_value(val, is_pct=True, decimals=2):
-    """格式化数值"""
+    """Formatting numbers"""
     if val is None:
         return '-'
     if is_pct:
@@ -186,25 +200,28 @@ def format_value(val, is_pct=True, decimals=2):
 
 def generate_merged_table(results_list, output_excel, output_csv=None):
     """
-    合并多个模型结果，生成论文格式表格
-
+    Merge results from multiple models to generate a table in paper format.
+    
     Args:
-        results_list: 处理后的结果列表
-        output_excel: 输出Excel文件路径
-        output_csv: 输出CSV文件路径（可选）
+    
+    results_list: List of processed results
+    
+    output_excel: Path to the output Excel file
+    
+    output_csv: Path to the output CSV file (optional)
     """
     if not results_list:
-        print("❌ 没有结果可以合并")
+        print("No results can be merged.")
         return
 
-    # 获取所有扰动类型
+    # Get all disturbance types
     all_perturb_types = set()
     for r in results_list:
         all_perturb_types.update(r['perturbation_avg'].keys())
 
     all_perturb_types = sorted(list(all_perturb_types))
 
-    # 构建表格数据
+    # Building tabular data
     table_data = []
 
     for r in results_list:
@@ -215,15 +232,15 @@ def generate_merged_table(results_list, output_excel, output_csv=None):
             'Clean': format_value(r['clean'], r['is_percentage']),
         }
 
-        # 添加各扰动类型的平均值列
+        # Add an average column for each type of disturbance.
         for perturb_type in all_perturb_types:
             val = r['perturbation_avg'].get(perturb_type)
             row[perturb_type] = format_value(val, r['is_percentage'])
 
-        # 添加overall average
+        # overall average
         row['Avg'] = format_value(r['overall_avg'], r['is_percentage'])
 
-        # 计算delta (clean - avg)
+        # delta (clean - avg)
         if r['clean'] is not None and r['overall_avg'] is not None:
             delta = r['clean'] - r['overall_avg']
             row['ΔTP'] = format_value(delta, r['is_percentage'])
@@ -232,33 +249,33 @@ def generate_merged_table(results_list, output_excel, output_csv=None):
 
         table_data.append(row)
 
-    # 转为DataFrame
+    # DataFrame
     df = pd.DataFrame(table_data)
 
-    # 排序
+    # Sort
     df = df.sort_values(['Task', 'Dataset', 'Model'])
 
-    # 保存Excel
+    # Save as Excel
     with pd.ExcelWriter(output_excel, engine='openpyxl') as writer:
         df.to_excel(writer, sheet_name='Results', index=False)
 
-    print(f"✅ 已保存Excel表格: {output_excel}")
+    print(f"The saved Excel spreadsheet is: {output_excel}")
 
-    # 保存CSV（可选）
+    # CSV
     if output_csv:
         df.to_csv(output_csv, index=False)
-        print(f"✅ 已保存CSV表格: {output_csv}")
+        print(f"CSV table saved: {output_csv}")
 
 
 def find_result_files(input_dir, task_filter=None, dataset_filter=None):
-    """在目录中查找结果文件"""
+    """Search for the result file in the directory."""
     input_dir = Path(input_dir)
     if not input_dir.exists():
         return []
 
     result_files = list(input_dir.rglob("results_*.json"))
 
-    # 过滤任务和数据集
+    # Filtering tasks and datasets
     filtered_files = []
     for f in result_files:
         try:
@@ -279,11 +296,11 @@ def find_result_files(input_dir, task_filter=None, dataset_filter=None):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="合并多个模型评测结果生成表格")
+    parser = argparse.ArgumentParser(description="Combine the evaluation results of multiple models to generate a table")
     parser.add_argument("--input_dir", type=str, default=None,
-                        help="包含结果JSON文件的目录")
+                        help="Directory containing the result JSON file")
     parser.add_argument("--files", nargs='+', type=str, default=None,
-                        help="直接指定结果JSON文件列表")
+                        help="Specify the list of result JSON files directly")
     parser.add_argument("--task", type=str, default=None,
                         choices=['vqa', 'caption', 'grounding'],
                         help="过滤特定任务")
