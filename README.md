@@ -1,6 +1,6 @@
 # Robustness Evaluation and Fine-tuning of Medical Image Segmentation and Vision-Language Models
 
-This repository contains the code for our paper submitted to MICCAI 2025.
+This repository contains the code for our paper submitted to MICCAI 2026.
 
 ## Overview
 
