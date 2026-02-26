@@ -4,7 +4,7 @@ This repository contains the code for our paper submitted to MICCAI 2025.
 
 ## Overview
 
-[framework.pdf](https://github.com/user-attachments/files/25563330/framework.pdf)
+<img width="720" height="420" alt="framework_01" src="https://github.com/user-attachments/assets/6a393191-5abb-41ad-b8cb-6953a517a379" />
 
 We present a comprehensive robustness benchmark for medical image AI models, covering:
 
