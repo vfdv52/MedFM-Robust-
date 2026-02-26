@@ -4,6 +4,8 @@ This repository contains the code for our paper submitted to MICCAI 2025.
 
 ## Overview
 
+[framework.pdf](https://github.com/user-attachments/files/25563330/framework.pdf)
+
 We present a comprehensive robustness benchmark for medical image AI models, covering:
 
 - **Adversarial robustness**: FGSM and PGD attacks at 5 perturbation levels on medical segmentation models
