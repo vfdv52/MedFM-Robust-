@@ -1,6 +1,6 @@
-# Robustness Evaluation and Fine-tuning of Medical Image Segmentation and Vision-Language Models
+# MedFM-Robust: Benchmarking Robustness of Medical Foundation Models
 
-This repository contains the code for our paper submitted to MICCAI 2026.
+This repository contains the code for our paper submitted to **MICCAI 2026**.
 
 ## Overview
 
@@ -9,13 +9,13 @@ This repository contains the code for our paper submitted to MICCAI 2026.
 We present a comprehensive robustness benchmark for medical image AI models, covering:
 
 - **Adversarial robustness**: FGSM and PGD attacks at 5 perturbation levels on medical segmentation models
-- **Natural corruption robustness**: 15+ image corruption types (noise, blur, compression, etc.) across 5 severity levels
-- **Fine-tuning strategies**: Decoder-only, LoRA, Adapter, and Encoder-partial fine-tuning to improve robustness
-- **VLM evaluation**: Robustness of medical VLMs (LLaVA-Med, MedGemma) on VQA, captioning, and visual grounding tasks
+- **Natural corruption robustness**: 40 perturbation types (12 base + 28 medical-specific) across 5 SSIM-calibrated severity levels
+- **Fine-tuning strategies**: Full, Decoder-only, Encoder-partial, LoRA, and Adapter — robustness comparison across all strategies
+- **VLM evaluation**: Robustness of medical VLMs (LLaVA-Med, MedGemma, MedGemma-1.5, GPT-4o-mini, Gemini-2.5-flash) on VQA, captioning, and visual grounding tasks
 
 **Supported segmentation models:** MedSAM, SAM-Med2D
 
-**Supported VLMs:** LLaVA-Med, MedGemma, MedGemma 1.5, GPT-4V (API), Gemini (API)
+**Supported VLMs:** LLaVA-Med, MedGemma, MedGemma 1.5, GPT-4o-mini, Gemini-2.5-flash
 
 **Supported datasets:** ISIC 2016, Brain Tumor MRI, Breast Ultrasound, Endoscopy, Retinal, Pathology, OmniMedVQA, ROCO, MeCoVQA
 
@@ -24,6 +24,7 @@ We present a comprehensive robustness benchmark for medical image AI models, cov
 ---
 
 ## Repository Structure
+
 ```
 .
 ├── Segmentation/
@@ -80,30 +81,31 @@ pip install git+https://github.com/facebookresearch/segment-anything.git
 **For segmentation datasets:**
 ```bash
 # Generate perturbations for a single dataset
-python segmentation_generate_perb_all_V10_adpative_efficient.py \
+python Segmentation/segmentation_generate_perb_all_V10_adaptive_efficient.py \
     --dataset_name isic_2016 \
     --adaptive
 
 # Generate perturbations for all datasets
-python segmentation_generate_perb_all_V10_adpative_efficient.py --all_datasets --adaptive
+python Segmentation/segmentation_generate_perb_all_V10_adaptive_efficient.py \
+    --all_datasets --adaptive
 
 # Custom level intensity multipliers
-python segmentation_generate_perb_all_V10_adpative_efficient.py \
+python Segmentation/segmentation_generate_perb_all_V10_adaptive_efficient.py \
     --dataset_name isic_2016 \
     --level_multipliers '{"1": 2.0, "3": 3.0, "5": 4.0}'
 ```
 
 **For VLM datasets:**
 ```bash
-python generate_perturbation.py --dataset omnimedvqa --sample_num 50
-python generate_perturbation.py --all --sample_num 50
+python VLM/generate_perturbation.py --dataset omnimedvqa --sample_num 50
+python VLM/generate_perturbation.py --all --sample_num 50
 ```
 
 ### 2. Evaluate Segmentation Model Robustness
 
 **Adversarial attack evaluation:**
 ```bash
-python pipeline.py \
+python Segmentation/pipeline.py \
     --model_name medsam \
     --dataset_name isic_2016 \
     --eval_mode adversarial \
@@ -113,7 +115,7 @@ python pipeline.py \
 
 **Corruption robustness evaluation:**
 ```bash
-python pipeline.py \
+python Segmentation/pipeline.py \
     --model_name medsam \
     --dataset_name isic_2016_perturbed \
     --eval_mode perturbation \
@@ -122,7 +124,7 @@ python pipeline.py \
 
 **Both modes simultaneously:**
 ```bash
-python pipeline.py \
+python Segmentation/pipeline.py \
     --model_name sammed2d \
     --dataset_name isic_2016 isic_2016_perturbed \
     --eval_mode both
@@ -132,14 +134,14 @@ python pipeline.py \
 
 ```bash
 # Decoder-only fine-tuning (fastest, recommended for small datasets)
-python finetune.py \
+python Segmentation/finetune.py \
     --model_name medsam \
     --strategy decoder_only \
     --data_path /path/to/data \
     --num_epochs 10
 
 # LoRA fine-tuning (parameter-efficient)
-python finetune.py \
+python Segmentation/finetune.py \
     --model_name medsam \
     --strategy lora \
     --lora_r 8 \
@@ -148,14 +150,14 @@ python finetune.py \
     --num_epochs 20
 
 # Adapter fine-tuning (SAM-Med2D)
-python finetune.py \
+python Segmentation/finetune.py \
     --model_name sammed2d \
     --strategy adapter_only \
     --data_path /path/to/data \
     --num_epochs 20
 
 # Partial encoder fine-tuning
-python finetune.py \
+python Segmentation/finetune.py \
     --model_name medsam \
     --strategy encoder_partial \
     --unfreeze_encoder_layers 4 \
@@ -165,7 +167,7 @@ python finetune.py \
 ### 4. Evaluate Fine-tuned Model
 
 ```bash
-python pipeline.py \
+python Segmentation/pipeline.py \
     --model_name medsam \
     --dataset_name isic_2016 \
     --eval_mode both \
@@ -177,14 +179,14 @@ python pipeline.py \
 
 ```bash
 # VQA task with LLaVA-Med
-python eval_vlm_perturbation.py \
+python VLM/eval_vlm_perturbation.py \
     --dataset omnimedvqa \
     --task vqa \
     --model_type llava-med \
     --sample_num 100
 
 # Grounding task with MedGemma (with fine-tuning)
-python eval_vlm_perturbation.py \
+python VLM/eval_vlm_perturbation.py \
     --dataset mecovqa \
     --task grounding \
     --model_type medgemma \
@@ -195,10 +197,10 @@ python eval_vlm_perturbation.py \
 
 ```bash
 # Merge all results into paper-ready tables
-python merge_results_to_table.py --results_dir ./results
+python VLM/merge_results_to_table.py --results_dir ./results
 
 # Extract and organize CSV files
-python extract_csv_results.py \
+python Segmentation/extract_csv_results.py \
     --results_dir ./results \
     --output_dir ./extracted_csv \
     --summary_only \
@@ -211,8 +213,8 @@ python extract_csv_results.py \
 
 Model and dataset paths are configured via JSON files:
 
-- `model_config.json`: Model weights paths, image sizes, and normalization parameters
-- `dataset_config.json`: Dataset image/mask directories, bounding box annotations, and output settings
+- `Segmentation/model_config.json`: Model weights paths, image sizes, and normalization parameters
+- `Segmentation/dataset_config.json`: Dataset image/mask directories, bounding box annotations, and output settings
 
 ---
 
@@ -220,29 +222,62 @@ Model and dataset paths are configured via JSON files:
 
 | Category | Types |
 |----------|-------|
-| Noise | Gaussian noise, Shot noise, Impulse noise, Speckle noise |
+| Noise | Gaussian noise, Salt-and-pepper, Speckle noise |
 | Blur | Gaussian blur, Motion blur, Defocus blur |
-| Weather | Fog, Frost, Snow |
 | Digital | JPEG compression, Pixelation, Contrast, Brightness, Saturation |
+| Geometric | Rotation, Scaling, Translation |
+| CT | Metal artifacts, Beam-hardening cupping |
+| MRI | Bias-field inhomogeneity, Ghosting / k-space motion |
+| Ultrasound | Acoustic shadowing, Reverberation |
+| Pathology | Stain variation (HSV) |
+| Endoscopy | Specular reflection, Bubbles |
+| OCT | Shadow, Blink artifacts, Defocus |
+| X-ray | Scatter, Exposure variation, Grid patterns |
+| Angiography | Haze |
 
-Each type has 5 severity levels (1=mild, 5=severe), generated with adaptive SSIM-calibrated intensity.
+Each type has **5 severity levels** (1 = mild, 5 = severe), generated with adaptive SSIM-calibrated intensity (Level 1: SSIM 0.90–0.98 → Level 5: SSIM 0.50–0.59).
 
 ---
 
 ## Evaluation Metrics
 
-- **IoU (Intersection over Union)**: Primary segmentation metric
-- **Dice coefficient**: Secondary segmentation metric
-- **IoU Drop / Dice Drop**: Performance degradation under perturbation
-- **ΔTP**: Clean performance minus average corrupted performance
+| Metric | Task | Description |
+|--------|------|-------------|
+| IoU | Segmentation | Primary metric; Intersection over Union |
+| Dice | Segmentation | Secondary metric; F1 score over masks |
+| IoU Drop / Dice Drop | Segmentation | Performance degradation under perturbation |
+| Accuracy | VQA / Grounding | % correctly answered / localized |
+| Acc@IoU≥0.5 | Grounding | Bounding box overlap threshold |
+| BLEU-4 | Captioning | n-gram precision with brevity penalty |
+| CIDEr | Captioning | TF-IDF weighted consensus score |
 
 ---
 
 ## Results
 
+### Segmentation — Strategy Ranking
+
+| Rank | Strategy | Mean IoU Drop |
+|------|----------|--------------|
+| 1 | **Full fine-tuning** | **0.025** |
+| 2 | Dec-Only | 0.029 |
+| 2 | Enc-Partial | 0.029 |
+| 2 | Dec-Prompt | 0.029 |
+| 5 | Adapter | 0.033 |
+| 6 | LoRA | 0.048 |
+
+### VLM — Task Robustness
+
+| Task | Setting | Drop |
+|------|---------|------|
+| Captioning | Zero-shot | < 0.02 BLEU |
+| VQA (medical models) | Zero-shot | < 8 points |
+| VQA (Gemini-2.5-flash) | Zero-shot | 36.1 points (54% relative) |
+| Visual Grounding | LoRA fine-tuned | > 40 points |
+
 Results are automatically saved to `./results/` with:
 - Per-image detailed CSV files
-- `*_SUMMARY.csv`: Aggregated statistics per corruption type (Table 1 format)
+- `*_SUMMARY.csv`: Aggregated statistics per corruption type
 - `*_STATS_BY_LEVEL.csv`: Breakdown by severity level
 
 ---
