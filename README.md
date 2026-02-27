@@ -2,6 +2,10 @@
 
 A comprehensive framework for evaluating the robustness of medical foundation models under realistic perturbations, supporting both segmentation and vision-language tasks.
 
+## 🌐 Project Page
+
+👉 [https://vfdv52.github.io/MedFM-Robust-/](https://vfdv52.github.io/MedFM-Robust-/)
+
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Paper](https://img.shields.io/badge/Paper-MICCAI%202026%20(under%20review)-green.svg)](#citation)
