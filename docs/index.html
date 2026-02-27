@@ -360,7 +360,7 @@
     /* ── BIBTEX ── */
     .bibtex-wrap {
       position: relative;
-      background: #1e2433;
+      background: #0f172a;
       border-radius: 10px;
       overflow: hidden;
     }
@@ -374,9 +374,9 @@
       overflow-x: auto;
     }
 
-      pre .kw  { color: #7ec8a0; }  
-      pre .val { color: #c8a96e; } 
-      pre .fd  { color: #7aaed6; }  
+    pre .kw  { color: #34d399; }
+    pre .val { color: #fbbf24; }
+    pre .fd  { color: #60a5fa; }
 
     .copy-btn {
       position: absolute;
@@ -456,11 +456,9 @@
   <img src="assets/results_overview.png" alt="Key Results" />
   <p class="hero-caption">
     <strong>Fig. 2.</strong>
-    <strong>(Left)</strong>
     <strong>(a)</strong> Traditional clean-image evaluation pipeline.
     <strong>(b)</strong> Our robustness benchmark applies modality-adaptive perturbations before the encoder and evaluates both Med-VLM tasks and segmentation under matched settings.
     <strong>(c)</strong> Metrics comparison: IoU drop closely tracks Dice drop, and representative fatal perturbations cause increasing performance degradation with higher severity levels.
-    <strong>(Right)</strong> Fatal perturbations cause increasing degradation with severity level; OCT motion artifacts are the most destructive.
   </p>
 </div>
 
