@@ -24,20 +24,32 @@ We present a comprehensive robustness benchmark for medical image AI models, cov
 ---
 
 ## Repository Structure
-
 ```
 .
-├── pipeline.py                          # Main evaluation pipeline (adversarial & perturbation)
-├── model_zoo.py                         # Segmentation model wrappers (MedSAM, SAM-Med2D)
-├── finetune.py                          # Fine-tuning training script
-├── finetune_utils.py                    # Fine-tuning utilities (LoRA, Adapter, Optimizer, Loss)
-├── segmentation_generate_perb_all_V10_adpative_efficient.py  # Perturbation dataset generator (segmentation)
-├── generate_perturbation.py             # Perturbation dataset generator (VLM)
-├── eval_vlm_perturbation.py             # VLM robustness evaluation script
-├── merge_results_to_table.py            # Merge results into paper-ready tables
-├── extract_csv_results.py               # CSV result extraction and organization tool
-├── model_config.json                    # Model configuration
-└── dataset_config.json                  # Dataset configuration
+├── Segmentation/
+│   ├── pipeline.py                                        # Main evaluation pipeline
+│   ├── model_zoo.py                                       # Model wrappers (MedSAM, SAM-Med2D)
+│   ├── finetune.py                                        # Fine-tuning training script
+│   ├── finetune_utils.py                                  # Fine-tuning utilities (LoRA, Adapter, Loss)
+│   ├── segmentation_generate_perb_all_V10_adaptive_efficient.py  # Perturbation dataset generator
+│   ├── extract_csv_results.py                             # CSV result extraction and organization
+│   ├── jobgpu_with_finetune.sh                            # GPU job submission script
+│   ├── model_config.json                                  # Model configuration
+│   ├── dataset_config.json                                # Dataset configuration
+│   └── data_record.json                                   # Data split records
+│
+├── VLM/
+│   ├── eval_vlm_perturbation.py                           # VLM robustness evaluation
+│   ├── generate_perturbation.py                           # Perturbation dataset generator (VLM)
+│   ├── merge_results_to_table.py                          # Merge results into paper-ready tables
+│   └── run_vlm_perturbation_multi_gpu.py                  # Multi-GPU VLM evaluation runner
+│
+├── Tools/
+│   ├── 1.mask2pos_img_and_gt.py                           # Convert masks to positional image & GT
+│   └── 2.mask2pos_for_bbox_coordinates.py                 # Convert masks to bounding box coordinates
+│
+├── LICENSE
+└── README.md
 ```
 
 ---
