@@ -19,6 +19,8 @@ We present a comprehensive robustness benchmark for medical image AI models, cov
 
 **Supported datasets:** ISIC 2016, Brain Tumor MRI, Breast Ultrasound, Endoscopy, Retinal, Pathology, OmniMedVQA, ROCO, MeCoVQA
 
+<img width="720" height="218" alt="intro_01" src="https://github.com/user-attachments/assets/bd0bf1b1-1657-4f0e-a31e-26f116a8d372" />
+
 ---
 
 ## Repository Structure
