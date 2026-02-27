@@ -1,6 +1,20 @@
-# MedFM-Robust: Benchmarking Robustness of Medical Foundation Models
+# 🏥 MedFM-Robust: Benchmarking Robustness of Medical Foundation Models
 
-This repository contains the code for our paper submitted to **MICCAI 2026**.
+A comprehensive framework for evaluating the robustness of medical foundation models under realistic perturbations, supporting both segmentation and vision-language tasks.
+
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Paper](https://img.shields.io/badge/Paper-MICCAI%202026%20(under%20review)-green.svg)](#citation)
+
+**Key Highlights:**
+
+- 🔬 Systematic robustness evaluation across 8 medical imaging modalities
+- 🎯 SSIM-guided perturbation generation with calibrated severity levels
+- 🧠 Benchmarking of Med-VLMs (LLaVA-Med, MedGemma) and SAM-based segmentation models
+- ⚡ Multiple fine-tuning strategies including LoRA and adapter-based methods
+- 📊 Comprehensive metrics for segmentation (IoU, Dice) and VLM tasks (Accuracy, BLEU, CIDEr)
+
+---
 
 ## Overview
 
@@ -22,6 +36,24 @@ We present a comprehensive robustness benchmark for medical image AI models, cov
 <img width="720" height="218" alt="intro_01" src="https://github.com/user-attachments/assets/bd0bf1b1-1657-4f0e-a31e-26f116a8d372" />
 
 ---
+
+## 📑 Table of Contents
+
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Project Structure](#project-structure)
+- [Supported Models](#supported-models)
+- [Supported Datasets](#supported-datasets)
+- [Perturbation Types](#perturbation-types)
+- [Usage Guide](#usage-guide)
+- [Configuration](#configuration)
+- [Evaluation Metrics](#evaluation-metrics)
+- [Results](#results)
+- [Citation](#citation)
+- [Acknowledgments](#acknowledgments)
+- [License](#license)
 
 ## Repository Structure
 
